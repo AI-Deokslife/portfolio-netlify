@@ -229,6 +229,12 @@ export default function AppCard({ app, onEdit, onDelete }: AppCardProps) {
               GitHub 저장소
             </LinkItem>
           )}
+          {(app as any).download_url && (
+            <LinkItem href={(app as any).download_url} download={(app as any).download_filename}>
+              <span className="link-icon">📥</span>
+              프로그램 다운로드 ({(app as any).download_filename})
+            </LinkItem>
+          )}
         </LinksSection>
 
         {app.tech_stack && (
