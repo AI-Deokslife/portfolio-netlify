@@ -166,11 +166,37 @@ const BackLink = styled.a`
 export default function StorageSetupPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checkingStatus, setCheckingStatus] = useState(false)
   const [status, setStatus] = useState<{
     type: 'success' | 'error' | 'info'
     message: string
   } | null>(null)
   const [setupComplete, setSetupComplete] = useState(false)
+
+  const checkStorageStatus = async () => {
+    setCheckingStatus(true)
+    setStatus({ type: 'info', message: 'Storage 상태를 확인하는 중...' })
+
+    try {
+      const response = await fetch('/api/check-storage')
+      const result = await response.json()
+
+      if (result.success && result.bucketExists && result.canUpload) {
+        setStatus({ type: 'success', message: result.message })
+        setSetupComplete(true)
+      } else if (result.success && result.bucketExists && !result.canUpload) {
+        setStatus({ type: 'error', message: result.message })
+      } else if (result.success && !result.bucketExists) {
+        setStatus({ type: 'info', message: result.message })
+      } else {
+        setStatus({ type: 'error', message: result.error || 'Storage 상태 확인 실패' })
+      }
+    } catch (error) {
+      setStatus({ type: 'error', message: 'Storage 상태 확인 중 오류가 발생했습니다.' })
+    } finally {
+      setCheckingStatus(false)
+    }
+  }
 
   const setupStorage = async () => {
     if (!password.trim()) {
@@ -243,16 +269,27 @@ export default function StorageSetupPage() {
         <Title>📸 Supabase Storage 설정</Title>
         
         <Description>
-          <p>포트폴리오 이미지를 Supabase Storage에 영구 저장하기 위한 설정입니다.</p>
+          <p>포트폴리오 이미지를 Supabase Storage에 영구 저장하기 위한 수동 설정 방법입니다.</p>
           
-          <h3>설정 과정:</h3>
+          <h3>🔧 Supabase 대시보드 수동 설정 (권장):</h3>
+          <ol style={{ marginLeft: '1.5rem' }}>
+            <li><strong><a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{color: '#667eea'}}>Supabase 대시보드</a></strong>에 로그인</li>
+            <li><strong>Storage</strong> 메뉴 클릭</li>
+            <li><strong>Create bucket</strong> 버튼 클릭</li>
+            <li>버킷 이름: <code style={{background: '#f1f3f4', padding: '2px 4px', borderRadius: '3px'}}>project-images</code></li>
+            <li><strong>Public bucket</strong> 체크박스 활성화</li>
+            <li><strong>Create bucket</strong> 클릭하여 생성</li>
+          </ol>
+          
+          <h3>✅ 설정 완료 후:</h3>
           <ul>
-            <li>✅ <strong>project-images</strong> 저장소 버킷 생성</li>
-            <li>✅ 이미지 업로드 권한 설정</li>
-            <li>✅ 공개 접근 권한 설정</li>
+            <li>모든 이미지가 Supabase Storage에 영구 저장</li>
+            <li>CDN을 통한 빠른 이미지 로딩</li>
+            <li>Base64 임시 저장 방식 완전 제거</li>
           </ul>
           
-          <p><strong>⚠️ 이 설정은 최초 1회만 실행하면 됩니다.</strong></p>
+          <h3>🧪 자동 설정 테스트:</h3>
+          <p>아래 버튼으로 자동 설정을 시도할 수 있습니다. (실패 시 위 수동 방법 사용)</p>
         </Description>
 
         {!setupComplete && (
@@ -272,11 +309,19 @@ export default function StorageSetupPage() {
             <ButtonGroup>
               <Button 
                 type="button" 
+                className="secondary" 
+                onClick={checkStorageStatus}
+                disabled={checkingStatus}
+              >
+                {checkingStatus ? '확인 중...' : '🔍 Storage 상태 확인'}
+              </Button>
+              <Button 
+                type="button" 
                 className="primary" 
                 onClick={setupStorage}
                 disabled={loading}
               >
-                {loading ? '설정 중...' : '🚀 Storage 설정 시작'}
+                {loading ? '설정 중...' : '🚀 자동 설정 시도'}
               </Button>
             </ButtonGroup>
           </>

@@ -38,20 +38,14 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
-    // 먼저 버킷이 존재하는지 확인하고 없으면 생성 시도
+    // 버킷 존재 여부 확인 (생성은 시도하지 않음)
+    let bucketExists = false
     try {
       const { data: buckets } = await supabase.storage.listBuckets()
-      const bucketExists = buckets?.some(bucket => bucket.name === 'project-images')
-      
-      if (!bucketExists) {
-        console.log('Creating bucket...')
-        await supabase.storage.createBucket('project-images', {
-          public: true,
-          allowedMimeTypes: ['image/*']
-        })
-      }
+      bucketExists = buckets?.some(bucket => bucket.name === 'project-images') || false
+      console.log('Bucket exists:', bucketExists)
     } catch (bucketError) {
-      console.log('Bucket operation failed, continuing with upload:', bucketError)
+      console.log('Bucket check failed, will try upload anyway:', bucketError)
     }
 
     // Supabase Storage에 업로드 시도
