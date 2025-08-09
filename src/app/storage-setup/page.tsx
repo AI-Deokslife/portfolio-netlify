@@ -51,31 +51,6 @@ const Description = styled.div`
   }
 `
 
-const InputGroup = styled.div`
-  margin-bottom: 2rem;
-`
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #555;
-  font-weight: 500;
-`
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.8rem;
-  border: 2px solid #e1e5e9;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-`
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -164,14 +139,11 @@ const BackLink = styled.a`
 `
 
 export default function StorageSetupPage() {
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const [checkingStatus, setCheckingStatus] = useState(false)
   const [status, setStatus] = useState<{
     type: 'success' | 'error' | 'info'
     message: string
   } | null>(null)
-  const [setupComplete, setSetupComplete] = useState(false)
 
   const checkStorageStatus = async () => {
     setCheckingStatus(true)
@@ -183,7 +155,6 @@ export default function StorageSetupPage() {
 
       if (result.success && result.bucketExists && result.canUpload) {
         setStatus({ type: 'success', message: result.message })
-        setSetupComplete(true)
       } else if (result.success && result.bucketExists && !result.canUpload) {
         setStatus({ type: 'error', message: result.message })
       } else if (result.success && !result.bucketExists) {
@@ -198,70 +169,6 @@ export default function StorageSetupPage() {
     }
   }
 
-  const setupStorage = async () => {
-    if (!password.trim()) {
-      setStatus({ type: 'error', message: '관리자 비밀번호를 입력해주세요.' })
-      return
-    }
-
-    setLoading(true)
-    setStatus({ type: 'info', message: 'Storage 버킷을 설정하는 중...' })
-
-    try {
-      // 1. Storage 버킷 생성
-      const storageResponse = await fetch('/api/setup-storage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ admin_password: password })
-      })
-
-      if (!storageResponse.ok) {
-        const errorData = await storageResponse.json()
-        throw new Error(errorData.error || 'Storage 설정 실패')
-      }
-
-      const storageResult = await storageResponse.json()
-      setStatus({ type: 'success', message: storageResult.message })
-
-      // 2. Storage 정책 설정
-      setTimeout(async () => {
-        setStatus({ type: 'info', message: 'Storage 정책을 설정하는 중...' })
-        
-        try {
-          const policyResponse = await fetch('/api/setup-policies', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ admin_password: password })
-          })
-
-          const policyResult = await policyResponse.json()
-          
-          if (policyResult.success) {
-            setStatus({ 
-              type: 'success', 
-              message: '✅ Storage 설정이 완료되었습니다! 이제 이미지가 Supabase Storage에 영구 저장됩니다.' 
-            })
-            setSetupComplete(true)
-          } else {
-            setStatus({ 
-              type: 'info', 
-              message: 'Storage 버킷은 생성되었으나, 정책 설정은 수동으로 진행해야 할 수 있습니다.' 
-            })
-          }
-        } catch (policyError) {
-          setStatus({ 
-            type: 'info', 
-            message: 'Storage 버킷은 생성되었습니다. 이미지 업로드를 테스트해보세요!' 
-          })
-        }
-      }, 1000)
-
-    } catch (error: any) {
-      setStatus({ type: 'error', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <Container>
@@ -269,63 +176,44 @@ export default function StorageSetupPage() {
         <Title>📸 Supabase Storage 설정</Title>
         
         <Description>
-          <p>포트폴리오 이미지를 Supabase Storage에 영구 저장하기 위한 수동 설정 방법입니다.</p>
+          <p>포트폴리오 이미지를 Supabase Storage에 영구 저장하기 위한 설정입니다.</p>
           
-          <h3>🔧 Supabase 대시보드 수동 설정 (권장):</h3>
-          <ol style={{ marginLeft: '1.5rem' }}>
-            <li><strong><a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{color: '#667eea'}}>Supabase 대시보드</a></strong>에 로그인</li>
-            <li><strong>Storage</strong> 메뉴 클릭</li>
-            <li><strong>Create bucket</strong> 버튼 클릭</li>
-            <li>버킷 이름: <code style={{background: '#f1f3f4', padding: '2px 4px', borderRadius: '3px'}}>project-images</code></li>
-            <li><strong>Public bucket</strong> 체크박스 활성화</li>
-            <li><strong>Create bucket</strong> 클릭하여 생성</li>
+          <h3>🔧 Supabase 대시보드에서 설정하기:</h3>
+          <ol style={{ marginLeft: '1.5rem', marginBottom: '1.5rem' }}>
+            <li><strong><a href="https://supabase.com/dashboard/project/dmeipyonfxlgufnanewn/storage/buckets" target="_blank" rel="noopener noreferrer" style={{color: '#667eea'}}>▶️ 여기를 클릭</a></strong>하여 Storage 페이지로 이동</li>
+            <li><strong>"Create bucket"</strong> 버튼 클릭</li>
+            <li>Name 입력: <code style={{background: '#f1f3f4', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold'}}>project-images</code></li>
+            <li><strong>"Public bucket"</strong> 체크박스 ✅ 활성화</li>
+            <li><strong>"Create bucket"</strong> 클릭하여 완료</li>
           </ol>
           
-          <h3>✅ 설정 완료 후:</h3>
-          <ul>
-            <li>모든 이미지가 Supabase Storage에 영구 저장</li>
-            <li>CDN을 통한 빠른 이미지 로딩</li>
-            <li>Base64 임시 저장 방식 완전 제거</li>
-          </ul>
+          <div style={{background: '#e3f2fd', border: '1px solid #90caf9', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem'}}>
+            <strong>💡 중요:</strong> 반드시 <strong>"Public bucket"</strong>을 체크해야 이미지가 웹에서 표시됩니다!
+          </div>
           
-          <h3>🧪 자동 설정 테스트:</h3>
-          <p>아래 버튼으로 자동 설정을 시도할 수 있습니다. (실패 시 위 수동 방법 사용)</p>
+          <h3>✅ 설정 완료 후 효과:</h3>
+          <ul style={{ marginBottom: '1.5rem' }}>
+            <li>🖼️ <strong>영구 저장:</strong> 모든 이미지가 Supabase 클라우드에 저장</li>
+            <li>⚡ <strong>빠른 로딩:</strong> CDN을 통한 고속 이미지 로딩</li>
+            <li>🔗 <strong>안정된 URL:</strong> 새로고침해도 이미지 유지</li>
+            <li>❌ <strong>임시 저장 제거:</strong> Base64 방식 완전 대체</li>
+          </ul>
+
+          <h3>🔍 설정 상태 확인:</h3>
+          <p>아래 버튼으로 버킷이 제대로 생성되었는지 확인할 수 있습니다.</p>
         </Description>
 
-        {!setupComplete && (
-          <>
-            <InputGroup>
-              <Label htmlFor="password">관리자 비밀번호</Label>
-              <Input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="관리자 비밀번호를 입력하세요"
-                disabled={loading}
-              />
-            </InputGroup>
-
-            <ButtonGroup>
-              <Button 
-                type="button" 
-                className="secondary" 
-                onClick={checkStorageStatus}
-                disabled={checkingStatus}
-              >
-                {checkingStatus ? '확인 중...' : '🔍 Storage 상태 확인'}
-              </Button>
-              <Button 
-                type="button" 
-                className="primary" 
-                onClick={setupStorage}
-                disabled={loading}
-              >
-                {loading ? '설정 중...' : '🚀 자동 설정 시도'}
-              </Button>
-            </ButtonGroup>
-          </>
-        )}
+        <ButtonGroup>
+          <Button 
+            type="button" 
+            className="primary" 
+            onClick={checkStorageStatus}
+            disabled={checkingStatus}
+            style={{ width: '100%' }}
+          >
+            {checkingStatus ? '확인 중...' : '🔍 Storage 상태 확인'}
+          </Button>
+        </ButtonGroup>
 
         {status && (
           <StatusBox type={status.type}>
