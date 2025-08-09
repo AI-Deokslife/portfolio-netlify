@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     // 타입 체크 오류 시에도 빌드 계속
     ignoreBuildErrors: false,
   },
+  // Netlify에서 API 라우트 지원을 위한 설정
+  trailingSlash: false,
+  experimental: {
+    serverComponentsExternalPackages: ["@supabase/supabase-js"],
+  }
 };
 
 export default nextConfig;

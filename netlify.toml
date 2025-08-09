@@ -5,16 +5,9 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_PUBLIC_SUPABASE_URL = "https://dmeipyonfxlgufnanewn.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWlweW9uZnhsZ3VmbmFuZXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NTI2NDksImV4cCI6MjA3MDEyODY0OX0.aI7PQe6PVQGJQ_M3hMMbKUpC1g_gSewTvJLI_NtIDMI"
+  INITIAL_ADMIN_PASSWORD = "deokslife"
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[functions]
-  node_bundler = "esbuild"
+# Next.js 15를 위한 새로운 설정
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
