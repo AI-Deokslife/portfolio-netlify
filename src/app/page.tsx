@@ -10,6 +10,7 @@ import SettingsModal from './components/SettingsModal'
 import SkillsEditModal from './components/SkillsEditModal'
 import ProjectManageModal from './components/ProjectManageModal'
 import { getStoredPassword } from './utils/passwordUtils'
+import { App } from './types/app'
 
 const Container = styled.div`
   min-height: 100vh;
@@ -326,18 +327,6 @@ const PageButton = styled.button`
     min-width: 40px;
   }
 `
-
-interface App {
-  id: number;
-  title: string;
-  description: string;
-  url?: string;
-  github_url?: string;
-  image_url?: string;
-  tech_stack?: string;
-  category?: string;
-  development_date?: string;
-}
 
 export default function HomePage() {
   const [apps, setApps] = useState<App[]>([])

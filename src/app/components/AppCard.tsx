@@ -1,5 +1,6 @@
 'use client'
 import styled from 'styled-components'
+import { App } from '../types/app'
 
 const Card = styled.div`
   background: #ffffff;
@@ -175,17 +176,6 @@ const ActionButton = styled.button`
   }
 `
 
-interface App {
-  id: number;
-  title: string;
-  description: string;
-  url?: string;
-  github_url?: string;
-  image_url?: string;
-  tech_stack?: string;
-  category?: string;
-  development_date?: string;
-}
 
 interface AppCardProps {
   app: App;

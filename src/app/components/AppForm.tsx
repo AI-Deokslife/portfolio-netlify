@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { getStoredPassword } from '../utils/passwordUtils'
+import { App } from '../types/app'
 
 const Overlay = styled.div`
   position: fixed;
@@ -234,17 +235,6 @@ const UploadProgress = styled.div`
   }
 `
 
-interface App {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  github_url?: string;
-  image_url?: string;
-  tech_stack?: string;
-  category?: string;
-  development_date?: string;
-}
 
 interface AppFormProps {
   app?: App | null;

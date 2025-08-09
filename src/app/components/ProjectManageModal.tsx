@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import { App } from '../types/app'
 
 const Overlay = styled.div`
   position: fixed;
@@ -205,18 +206,6 @@ const Button = styled.button`
   }
 `
 
-interface App {
-  id: number;
-  title: string;
-  description: string;
-  url?: string;
-  github_url?: string;
-  image_url?: string;
-  tech_stack?: string;
-  category?: string;
-  development_date?: string;
-  created_at?: string;
-}
 
 interface ProjectManageModalProps {
   apps: App[];
